@@ -1,0 +1,20 @@
+TODO:
+    Senin, 23 Oktober 2023
+    1. Tanya mas Iru soal VOLUME DEPENDENCIES
+
+need:
+1. Volume
+    - postgres-db-volume
+    - ${AIRFLOW_PROJ_DIR:-.}/dags
+    - ${AIRFLOW_PROJ_DIR:-.}/logs
+    - ${AIRFLOW_PROJ_DIR:-.}/config
+    - ${AIRFLOW_PROJ_DIR:-.}/plugins
+
+
+NGINX SETUP
+    1. AIRFLOW WEB SERVER
+        PORT 8080:8080 (CHANGE THE PORT SO IT WONT CONFLICT)
+    2. AIRFLOW SCHEDULER
+        PORT 8974:8080
+    3. FLOWER
+        PORT 5555:5555
