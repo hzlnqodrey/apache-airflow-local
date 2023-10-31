@@ -1,4 +1,4 @@
- # Licensed to the Apache Software Foundation (ASF) under one
+# Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
 # regarding copyright ownership.  The ASF licenses this file
@@ -62,21 +62,35 @@ x-airflow-common:
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-    AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
+    
+    # NEW ENV - 26 OKTOBER 2023 | Diskusi dg Mas Iru
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false' # false
+    
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
     # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
     # yamllint enable rule:line-length
+    
+    # NEW ENV - 26 OKTOBER 2023 | Diskusi dg Mas Iru
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+
     # WARNING: Use _PIP_ADDITIONAL_REQUIREMENTS option ONLY for a quick checks
     # for other purpose (development, test and especially production usage) build/extend Airflow image.
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
+    
+    # NEW ENV - 26 OKTOBER 2023 | Diskusi dg Mas Iru
+    # NEW ENV - 31 OKTOBER 2023 | Diskusi dg Mas Iru
+    AIRFLOW__CORE__TEST_CONNECTION: 'enabled'
+  
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
+    # NEW ENV - 26 OKTOBER 2023 | Diskusi dg Mas Iru
+    - ${AIRFLOW_PROJ_DIR:-.}/include:/opt/airflow/include
+
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -89,8 +103,8 @@ services:
   postgres:
     image: postgres:13
     environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: m4st3r!d4t4#
       POSTGRES_DB: airflow
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
@@ -100,6 +114,7 @@ services:
       retries: 5
       start_period: 5s
     restart: always
+    mem_limit: 512m
 
   redis:
     image: redis:latest
@@ -112,6 +127,7 @@ services:
       retries: 50
       start_period: 30s
     restart: always
+    mem_limit: 512m
 
   airflow-webserver:
     <<: *airflow-common
@@ -129,6 +145,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    mem_limit: 1g
 
   airflow-scheduler:
     <<: *airflow-common
@@ -144,6 +161,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    mem_limit: 512m
 
   airflow-worker:
     <<: *airflow-common
@@ -167,6 +185,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    mem_limit: 2g
 
   airflow-triggerer:
     <<: *airflow-common
@@ -182,6 +201,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    mem_limit: 512m
 
   airflow-init:
     <<: *airflow-common
@@ -254,9 +274,14 @@ services:
       <<: *airflow-common-env
       _AIRFLOW_DB_MIGRATE: 'true'
       _AIRFLOW_WWW_USER_CREATE: 'true'
-      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
-      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+
+      # NEW ENV - 26 OKTOBER 2023 | Diskusi dg Mas Iru | CHANGE THIS!!
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-admin}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-m4st3r!d4t4#}
+
+      # NEW ENV - 26 OKTOBER 2023 | Diskusi dg Mas Iru | Configure THIS!!
       _PIP_ADDITIONAL_REQUIREMENTS: ''
+
     user: "0:0"
     volumes:
       - ${AIRFLOW_PROJ_DIR:-.}:/sources
@@ -273,6 +298,7 @@ services:
       - bash
       - -c
       - airflow
+    mem_limit: 512m
 
   # You can enable flower by adding "--profile flower" option e.g. docker-compose --profile flower up
   # or by explicitly targeted on the command line e.g. docker-compose up flower.
@@ -295,6 +321,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    mem_limit: 512m
 
 volumes:
   postgres-db-volume:

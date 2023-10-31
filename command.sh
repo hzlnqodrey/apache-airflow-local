@@ -5,7 +5,7 @@ curl -LfO 'https://airflow.apache.org/docs/apache-airflow/2.7.2/docker-compose.y
 docker compose --profile flower up
 
 # Setting the right Airflow user
-mkdir -p ./dags ./logs ./plugins ./config
+mkdir -p ./dags ./logs ./plugins ./config ./include
 echo -e "AIRFLOW_UID=$(id -u)" > .env
 
 # Initialize the database
@@ -17,6 +17,7 @@ docker compose down --volumes --remove-orphans
 rm -rf '<DIRECTORY>'
 
 # AFTER CLEAN, RUN THE FOLLOWING COMMANDS
+curl -LfO 'https://airflow.apache.org/docs/apache-airflow/2.7.2/docker-compose.yaml'
 # Start the environment
 docker compose up
 

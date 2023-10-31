@@ -10,6 +10,9 @@ need:
     - ${AIRFLOW_PROJ_DIR:-.}/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins
 
+    New: 
+     - ${AIRFLOW_PROJ_DIR:-.}/include
+
 
 NGINX SETUP
     1. AIRFLOW WEB SERVER
